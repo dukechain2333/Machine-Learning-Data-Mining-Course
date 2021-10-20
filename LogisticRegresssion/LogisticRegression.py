@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def sigmoid(x):
     s = 1 / (1+np.exp(-x))
 
@@ -12,7 +15,6 @@ def gradient(X, y, beta):
 
     return gra.reshape(-1, 1)
 
-
 def update_parameters_gradDesc(X, y, beta, learning_rate, num_iterations, print_cost):
     for i in range(num_iterations):
 
@@ -23,6 +25,3 @@ def update_parameters_gradDesc(X, y, beta, learning_rate, num_iterations, print_
             print('{}th iteration, cost is {}'.format(i, J_cost(X, y, beta)))
 
     return beta
-
-
-
