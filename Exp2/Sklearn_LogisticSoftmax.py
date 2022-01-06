@@ -19,7 +19,7 @@ print("The result of Logistic Regression")
 print(y_pred)
 print(result)
 
-# Softmax
+# Softmax (仅做演示)
 proba = model.predict_proba(X_test)
 y_pred = np.argmax(proba, axis=1)
 result = classification_report(y_test, y_pred)
