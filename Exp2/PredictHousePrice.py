@@ -8,10 +8,10 @@ from sklearn.linear_model import LinearRegression
 boston = datasets.load_boston()
 train = boston.data
 target = boston.target
-X_train, x_test, y_train, y_true = train_test_split(train, target, test_size=0.2)
+X_train, X_test, y_train, y_true = train_test_split(train, target, test_size=0.2)
 
 model = LinearRegression()
 model.fit(X_train, y_train)
-y_predict = model.predict(x_test)
+y_predict = model.predict(X_test)
 result = r2_score(y_true, y_predict)
 print(result)
