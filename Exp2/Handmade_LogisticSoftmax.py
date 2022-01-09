@@ -26,9 +26,9 @@ class Softmax:
         for t in range(self.max_iter):
             for k in range(self.K):
                 l = [1 if item == k else 0 for item in y_train]
-                p = self.predict_proba(self.W, X_train, k)
-                g = np.sum((l - p) * X_train.T, axis=1)
-                self.W[k] = self.W[k] - (-self.lr * g + self.lam * self.W[k])
+                proba = self.predict_proba(self.W, X_train, k)
+                gradient = np.sum((l - proba) * X_train.T, axis=1)
+                self.W[k] = self.W[k] - (-self.lr * gradient + self.lam * self.W[k])
 
             if abs(np.sum(w_copy) - np.sum(self.W)) < self.tol:
                 break
