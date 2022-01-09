@@ -66,42 +66,56 @@ class DecisionTree:
         class_column = data.columns[-1]
         total_entropy = self._entropy(data.iloc[:, -1])
         entropy_gain = []
-        for i in attribute_columns:
-            tmp_data = data[[i, class_column]]
-            part_entropy = self._entropy(tmp_data)
-            entropy_gain.append(self._entropy_gain(total_entropy, part_entropy))
+        gain_ratio = []
+        if self.standard == 'ID3':
+            for i in attribute_columns:
+                tmp_data = data[[i, class_column]]
+                part_entropy = self._entropy(tmp_data)
+                entropy_gain.append(self._entropy_gain(total_entropy, part_entropy))
 
-        max_index = attribute_columns[entropy_gain.index(max(entropy_gain))]
+            max_index = attribute_columns[entropy_gain.index(max(entropy_gain))]
+            return max_index
 
-        return max_index
+        elif self.standard == 'C4.5':
+            iv = 0
+            for i in attribute_columns.value_counts().keys():
+                fraction = attribute_columns.value_counts()[i] / data.shape[0]
+                iv += fraction * math.log(fraction, 2)
+            for i in attribute_columns:
+                tmp_data = data[[i, class_column]]
+                part_entropy = self._entropy(tmp_data)
+                gain_ratio.append(self._entropy_gain(total_entropy, part_entropy) / (-iv))
+
+            max_index = attribute_columns[gain_ratio.index(max(gain_ratio))]
+            return max_index
+
+        else:
+            return False
 
     def fit(self, data):
-        if self.standard == 'ID3':
-            tmp_data = data.copy()
-            level = 1
-            while True:
-                max_index = self._compare(tmp_data)
-                self.decision_index.append(max_index)
-                values = data[max_index].value_counts().keys()
-                level_name = 'level ' + str(level)
-                level += 1
-                node = Node(max_index)
-                for v in values:
-                    if len(data[data[max_index] == v].iloc[:, -1].value_counts().keys()) == 1:
-                        node.append_child(v, data[data[max_index] == v].iloc[:, -1].value_counts().keys()[0])
-                    else:
-                        tmp_data = tmp_data[tmp_data[max_index] == v]
-                        tmp_data = tmp_data.drop(max_index, axis=1)
-                        node.append_child(v, 'NextLevel')
+        tmp_data = data.copy()
+        level = 1
+        while True:
+            max_index = self._compare(tmp_data)
+            self.decision_index.append(max_index)
+            values = data[max_index].value_counts().keys()
+            level_name = 'level ' + str(level)
+            level += 1
+            node = Node(max_index)
+            for v in values:
+                if len(data[data[max_index] == v].iloc[:, -1].value_counts().keys()) == 1:
+                    node.append_child(v, data[data[max_index] == v].iloc[:, -1].value_counts().keys()[0])
+                else:
+                    tmp_data = tmp_data[tmp_data[max_index] == v]
+                    tmp_data = tmp_data.drop(max_index, axis=1)
+                    node.append_child(v, 'NextLevel')
 
-                self.tree[level_name] = node
+            self.tree[level_name] = node
 
-                if len(tmp_data.iloc[:, -1].value_counts().keys()) == 1:
-                    break
+            if len(tmp_data.iloc[:, -1].value_counts().keys()) == 1:
+                break
 
-            return self.tree
-        else:
-            return self.tree
+        return self.tree
 
     def show_tree(self):
         for level in self.tree.keys():
@@ -110,6 +124,11 @@ class DecisionTree:
 
 if __name__ == '__main__':
     data = pd.read_csv('Data/loan.csv', index_col=0)
+    print("This is ID3:")
     model = DecisionTree()
+    model.fit(data)
+    model.show_tree()
+    print("This is C4.5:")
+    model = DecisionTree('C4.5')
     model.fit(data)
     model.show_tree()
